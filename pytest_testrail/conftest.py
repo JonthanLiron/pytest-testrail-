@@ -80,6 +80,11 @@ def pytest_addoption(parser):
         help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
               If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
+        '--tr-collect-by-plan',
+        action='store_true',
+        required=False,
+        help='Collect tests from TestRail plan specified by option "--tr-plan-id"')
+    group.addoption(
         '--tr-version',
         action='store',
         default='',
@@ -145,6 +150,8 @@ def pytest_configure(config):
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
+                collect_by_plan_id=config_manager.getoption('tr-collect-by-plan', 'collect_by_plan', 'TESTRUN',
+                                                    is_bool=True, default=False),
                 plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
