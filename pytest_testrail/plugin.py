@@ -160,6 +160,7 @@ class PyTestRailPlugin(object):
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
+        self.case_ids = set()
 
     # pytest hooks
 
@@ -182,15 +183,14 @@ class PyTestRailPlugin(object):
         if self.collect_by_plan_id:
             if self.testplan_id and self.is_testplan_available():
                 test_run_ids = self.get_available_testruns(self.testplan_id)
-                case_ids = set()
                 for run_id in test_run_ids:
                     tests = self.get_tests(run_id=run_id)
                     case_id_set = {d['case_id'] for d in tests}
-                    case_ids.update(case_id_set)
+                    self.case_ids.update(case_id_set)
 
                 matching_functions = set()
                 for test_func, tr_keys in items_with_tr_keys:
-                    if any(tr_key in case_ids for tr_key in tr_keys):
+                    if any(tr_key in self.case_ids for tr_key in tr_keys):
                         matching_functions.add(test_func)
                 new_items = list(set(items).intersection(matching_functions))
                 deselected_items = list(set(items) - matching_functions)
@@ -294,6 +294,9 @@ class PyTestRailPlugin(object):
         :param comment: None or a failure representation.
         :param duration: Time it took to run just the test.
         """
+        if len(self.case_ids):
+            test_ids = [element for element in test_ids if element in self.case_ids]
+
         for test_id in test_ids:
             data = {
                 'case_id': test_id,
