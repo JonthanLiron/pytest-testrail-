@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import sys
+import json
 from .plugin import PyTestRailPlugin
 from .testrail_api import APIClient
 if sys.version_info.major == 2:
@@ -9,6 +10,26 @@ if sys.version_info.major == 2:
 else:
     # python3
     import configparser
+
+
+def help_tr_create_plan_json():
+    try:
+        with open("tr_help.json", "r") as input_file:
+            data = json.load(input_file)
+        #help_str = json.dumps(data, indent=4)
+        help_str = ""
+        for run_test in data:
+            help_str = f'{help_str}{run_test["name"]}\tid: {run_test["id"]}\n'
+            last_test = run_test['tests'][-1]
+            for test in run_test['tests']:
+                if test == last_test:
+                    help_str = f'{help_str}└── title: {test["title"]}\n\x00\n\x00\n'
+                else:
+                    help_str = f'{help_str}├── title: {test["title"]}\n'
+
+        return help_str
+    except Exception:
+        return 'Create JSON help file for TestRail plan specified by option "--tr-plan-id"'
 
 
 def pytest_addoption(parser):
@@ -90,7 +111,7 @@ def pytest_addoption(parser):
         action='store_true',
         default=None,
         required=False,
-        help='Create JSON help file for TestRail plan specified by option "--tr-plan-id"')
+        help=help_tr_create_plan_json())
     group.addoption(
         '--tr-version',
         action='store',
