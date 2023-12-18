@@ -179,32 +179,48 @@ class PyTestRailPlugin(object):
         items_with_tr_keys = get_testrail_keys(items)
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
-        if self.testplan_id and self.is_testplan_available():
-            self.testrun_id = 0
-        elif self.testrun_id and self.is_testrun_available():
-            self.testplan_id = 0
-            if self.skip_missing:
-                tests_list = [
-                    test.get('case_id') for test in self.get_tests(self.testrun_id)
-                ]
-                for item, case_id in items_with_tr_keys:
-                    if not set(case_id).intersection(set(tests_list)):
-                        mark = pytest.mark.skip('Test is not present in testrun.')
-                        item.add_marker(mark)
-        else:
-            if self.testrun_name is None:
-                self.testrun_name = testrun_name()
+        if self.collect_by_plan_id:
+            if self.testplan_id and self.is_testplan_available():
+                test_run_ids = self.get_available_testruns(self.testplan_id)
+                case_ids = set()
+                for run_id in test_run_ids:
+                    tests = self.get_tests(run_id=run_id)
+                    case_id_set = {d['case_id'] for d in tests}
+                    case_ids.update(case_id_set)
 
-            self.create_test_run(
-                self.assign_user_id,
-                self.project_id,
-                self.suite_id,
-                self.include_all,
-                self.testrun_name,
-                tr_keys,
-                self.milestone_id,
-                self.testrun_description
-            )
+                matching_functions = set()
+                for test_func, tr_keys in items_with_tr_keys:
+                    if any(tr_key in case_ids for tr_key in tr_keys):
+                        matching_functions.add(test_func)
+                deselected_items = list(set(items) - matching_functions)
+                config.hook.pytest_deselected(items=deselected_items)
+        else:
+            if self.testplan_id and self.is_testplan_available():
+                self.testrun_id = 0
+            elif self.testrun_id and self.is_testrun_available():
+                self.testplan_id = 0
+                if self.skip_missing:
+                    tests_list = [
+                        test.get('case_id') for test in self.get_tests(self.testrun_id)
+                    ]
+                    for item, case_id in items_with_tr_keys:
+                        if not set(case_id).intersection(set(tests_list)):
+                            mark = pytest.mark.skip('Test is not present in testrun.')
+                            item.add_marker(mark)
+            else:
+                if self.testrun_name is None:
+                    self.testrun_name = testrun_name()
+
+                self.create_test_run(
+                    self.assign_user_id,
+                    self.project_id,
+                    self.suite_id,
+                    self.include_all,
+                    self.testrun_name,
+                    tr_keys,
+                    self.milestone_id,
+                    self.testrun_description
+                )
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
