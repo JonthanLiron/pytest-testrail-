@@ -5,6 +5,7 @@ from operator import itemgetter
 import pytest
 import re
 import warnings
+import json
 
 # Reference: http://docs.gurock.com/testrail-api2/reference-statuses
 TESTRAIL_TEST_STATUS = {
@@ -140,8 +141,9 @@ def get_testrail_keys(items):
 
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
-                 tr_description='', run_id=0, collect_by_plan_id=False, plan_id=0, version='', close_on_complete=False,
-                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None):
+                 tr_description='', run_id=0, collect_by_plan_id=False, create_plan_json=False,
+                 plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False,
+                 milestone_id=None, custom_comment=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -153,6 +155,7 @@ class PyTestRailPlugin(object):
         self.testrun_description = tr_description
         self.testrun_id = run_id
         self.collect_by_plan_id = collect_by_plan_id
+        self.create_plan_json = create_plan_json
         self.testplan_id = plan_id
         self.version = version
         self.close_on_complete = close_on_complete
@@ -175,12 +178,35 @@ class PyTestRailPlugin(object):
             message += 'a new testrun will be created'
         return message
 
+    def create_plan_id_json(self, session, config, items):
+        test_runs = self.get_available_testruns_ext(self.testplan_id)
+        items_with_tr_keys = get_testrail_keys(items)
+        found_items = dict()
+        for item, tr_keys in items_with_tr_keys:
+            for tr_key in tr_keys:
+                found_items[tr_key] = item
+        plan_list = list()
+        for run in test_runs:
+            run_list = list()
+            tests = self.get_tests(run_id=run['id'])
+            for test in tests:
+                if test['case_id'] in found_items:
+                    run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id'], 'test': found_items[test['case_id']].__str__()})
+                else:
+                    run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id']})
+            plan_list.append({'name': run['name'], 'id': run['id'], 'tests': run_list})
+        with open("tr_help.json", "w") as outfile:
+            json.dump(plan_list, outfile, indent=4)
+
+
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         items_with_tr_keys = get_testrail_keys(items)
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         if self.collect_by_plan_id:
+            if self.create_plan_json:
+                self.create_plan_id_json(session, config, items)
             if self.testplan_id and self.is_testplan_available():
                 test_run_ids = self.get_available_testruns(self.testplan_id)
                 for run_id in test_run_ids:
@@ -514,3 +540,23 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
             return None
         return response
+
+    def get_available_testruns_ext(self, plan_id):
+        """
+        :return: a list of available testruns associated to a testplan in TestRail.
+
+        """
+        testruns_list = []
+        response = self.client.send_get(
+            GET_TESTPLAN_URL.format(plan_id),
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
+        else:
+            for entry in response['entries']:
+                for run in entry['runs']:
+                    if not run['is_completed']:
+                        testruns_list.append(run)
+        return testruns_list
