@@ -81,7 +81,8 @@ def pytest_addoption(parser):
               If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-collect-by-plan',
-        action='store_true',
+        action='store',
+        default=None,
         required=False,
         help='Collect tests from TestRail plan specified by option "--tr-plan-id"')
     group.addoption(
