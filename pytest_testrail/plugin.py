@@ -192,7 +192,9 @@ class PyTestRailPlugin(object):
                 for test_func, tr_keys in items_with_tr_keys:
                     if any(tr_key in case_ids for tr_key in tr_keys):
                         matching_functions.add(test_func)
+                new_items = list(set(items).intersection(matching_functions))
                 deselected_items = list(set(items) - matching_functions)
+                items[:] = new_items
                 config.hook.pytest_deselected(items=deselected_items)
         else:
             if self.testplan_id and self.is_testplan_available():
