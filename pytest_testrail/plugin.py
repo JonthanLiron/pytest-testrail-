@@ -6,6 +6,7 @@ import pytest
 import re
 import warnings
 import json
+from .create_plan_help import TR_PLAN_HELP_JSON
 
 # Reference: http://docs.gurock.com/testrail-api2/reference-statuses
 TESTRAIL_TEST_STATUS = {
@@ -195,7 +196,7 @@ class PyTestRailPlugin(object):
                 else:
                     run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id']})
             plan_list.append({'name': run['name'], 'id': run['id'], 'tests': run_list})
-        with open("tr_help.json", "w") as outfile:
+        with open(TR_PLAN_HELP_JSON, "w") as outfile:
             json.dump(plan_list, outfile, indent=4)
 
     @pytest.hookimpl(trylast=True)
