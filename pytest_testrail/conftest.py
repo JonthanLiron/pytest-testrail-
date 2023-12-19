@@ -3,7 +3,7 @@ import os
 import sys
 from .plugin import PyTestRailPlugin
 from .testrail_api import APIClient
-from .create_plan_help import help_tr_create_plan_json
+from .create_plan_help import help_tr_create_plan_json, help_tr_create_project_plans_json
 if sys.version_info.major == 2:
     # python2
     import ConfigParser as configparser
@@ -78,8 +78,7 @@ def pytest_addoption(parser):
         '--tr-plan-id',
         action='store',
         required=False,
-        help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
-              If provided, option "--tr-testrun-name" will be ignored')
+        help=help_tr_create_project_plans_json())
     group.addoption(
         '--tr-collect-by-plan',
         action='store',

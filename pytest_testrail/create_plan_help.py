@@ -79,7 +79,7 @@ def help_tr_create_plan_json() -> str:
     try:
         with open(TR_PLAN_HELP_JSON, "r") as input_file:
             data = json.load(input_file)
-        #help_str = json.dumps(data, indent=4)
+
         help_str = 'Create JSON help file for TestRail plan specified by option "--tr-plan-id"\n\x00\n'
         for run_test in data:
             help_str = f'{help_str}{run_test["name"]}\nrun_id: {run_test["id"]}\n'
@@ -92,3 +92,20 @@ def help_tr_create_plan_json() -> str:
         return help_str
     except Exception:
         return 'Create JSON help file for TestRail plan specified by option "--tr-plan-id"'
+
+
+def help_tr_create_project_plans_json() -> str:
+    try:
+        with open(TR_PROJECT_HELP_JSON, "r") as input_file:
+            data = json.load(input_file)
+
+        help_str = 'Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
+              If provided, option "--tr-testrun-name" will be ignored\n\x00\n'
+        help_str = f'{help_str}Plans\n─────\n'
+        for plan in data:
+            help_str = f'{help_str}{plan["id"]}: {plan["name"]}\n'
+        help_str = f'{help_str}\x00\x00\n\x00\n'
+        return help_str
+    except Exception:
+        return 'Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
+              If provided, option "--tr-testrun-name" will be ignored'
