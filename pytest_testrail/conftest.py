@@ -148,6 +148,7 @@ def pytest_configure(config):
         config.pluginmanager.register(
             PyTestRailPlugin(
                 client=client,
+                collect_only=config.getoption('--collect-only'),
                 assign_user_id=config_manager.getoption('tr-testrun-assignedto-id', 'assignedto_id', 'TESTRUN'),
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),

@@ -3,6 +3,7 @@ from typing import Dict
 
 
 TR_PLAN_HELP_JSON = "tr_help.json"
+TR_PROJECT_HELP_JSON = "tr_project_help.json"
 
 
 def extract_function_name(s: str) -> str:
