@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Dict, List
 from .module_dir_file import ModuleDirFile
 
 
@@ -76,12 +76,22 @@ def last_test_string(test: Dict[str, str]) -> str:
     return help_str
 
 
+def draw_title(data: List[Dict[str, str]]) -> str:
+    for run_test in data:
+        title = f'Test Runs for Plan {run_test["plan_id"]}:'
+        title_line = f'{"─" * len(title)}'
+        return f'{title}\n{title_line}\n\x00\n'
+
+
 def help_tr_create_plan_json() -> str:
     try:
         with ModuleDirFile(TR_PLAN_HELP_JSON, "r") as input_file:
             data = json.load(input_file)
 
         help_str = 'Create JSON help file for TestRail plan specified by option "--tr-plan-id"\n\x00\n'
+
+        help_str = f'{help_str}{draw_title(data)}'
+
         for run_test in data:
             help_str = f'{help_str}{run_test["name"]}\nrun_id: {run_test["id"]}\n'
             last_test = run_test['tests'][-1]

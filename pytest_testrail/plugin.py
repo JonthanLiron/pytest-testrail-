@@ -197,7 +197,7 @@ class PyTestRailPlugin(object):
                     run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id'], 'test': found_items[test['case_id']].__str__()})
                 else:
                     run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id']})
-            plan_list.append({'name': run['name'], 'id': run['id'], 'tests': run_list})
+            plan_list.append({'name': run['name'], 'id': run['id'], 'plan_id': self.testplan_id, 'tests': run_list})
         with ModuleDirFile(TR_PLAN_HELP_JSON, "w") as outfile:
             json.dump(plan_list, outfile, indent=4)
 
