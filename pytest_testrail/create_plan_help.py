@@ -1,5 +1,6 @@
 import json
 from typing import Dict
+from .module_dir_file import ModuleDirFile
 
 
 TR_PLAN_HELP_JSON = "tr_help.json"
@@ -77,7 +78,7 @@ def last_test_string(test: Dict[str, str]) -> str:
 
 def help_tr_create_plan_json() -> str:
     try:
-        with open(TR_PLAN_HELP_JSON, "r") as input_file:
+        with ModuleDirFile(TR_PLAN_HELP_JSON, "r") as input_file:
             data = json.load(input_file)
 
         help_str = 'Create JSON help file for TestRail plan specified by option "--tr-plan-id"\n\x00\n'
@@ -96,7 +97,7 @@ def help_tr_create_plan_json() -> str:
 
 def help_tr_create_project_plans_json() -> str:
     try:
-        with open(TR_PROJECT_HELP_JSON, "r") as input_file:
+        with ModuleDirFile(TR_PROJECT_HELP_JSON, "r") as input_file:
             data = json.load(input_file)
 
         help_str = 'Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\

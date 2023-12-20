@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Extended Help files
+pytest_testrail/tr_help.json
+pytest_testrail/tr_project_help.json
 # C extensions
 *.so
 

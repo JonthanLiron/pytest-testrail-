@@ -7,6 +7,7 @@ import re
 import warnings
 import json
 from .create_plan_help import TR_PLAN_HELP_JSON, TR_PROJECT_HELP_JSON
+from .module_dir_file import ModuleDirFile
 
 # Reference: http://docs.gurock.com/testrail-api2/reference-statuses
 TESTRAIL_TEST_STATUS = {
@@ -197,7 +198,7 @@ class PyTestRailPlugin(object):
                 else:
                     run_list.append({'title': test['title'], 'id': test['id'], 'case_id': test['case_id']})
             plan_list.append({'name': run['name'], 'id': run['id'], 'tests': run_list})
-        with open(TR_PLAN_HELP_JSON, "w") as outfile:
+        with ModuleDirFile(TR_PLAN_HELP_JSON, "w") as outfile:
             json.dump(plan_list, outfile, indent=4)
 
     def create_plans_json(self, session, config, items):
@@ -206,7 +207,7 @@ class PyTestRailPlugin(object):
         json_list = list()
         for plan in plans:
             json_list.append({'name': plan['name'], 'id': plan['id']})
-        with open(TR_PROJECT_HELP_JSON, "w") as outfile:
+        with ModuleDirFile(TR_PROJECT_HELP_JSON, "w") as outfile:
             json.dump(json_list, outfile, indent=4)
 
     @pytest.hookimpl(trylast=True)
