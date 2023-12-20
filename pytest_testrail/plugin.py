@@ -142,8 +142,8 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(self, client, collect_only, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
-                 tr_description='', run_id=0, collect_by_plan_id=False, create_plan_json=False,
+    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
+                 tr_description='', run_id=0, collect_by_plan_id=False, create_extended_help=False,
                  plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False,
                  milestone_id=None, custom_comment=None):
         self.assign_user_id = assign_user_id
@@ -157,7 +157,7 @@ class PyTestRailPlugin(object):
         self.testrun_description = tr_description
         self.testrun_id = run_id
         self.collect_by_plan_id = collect_by_plan_id
-        self.create_plan_json = create_plan_json
+        self.create_extended_help = create_extended_help
         self.testplan_id = plan_id
         self.version = version
         self.close_on_complete = close_on_complete
@@ -166,7 +166,6 @@ class PyTestRailPlugin(object):
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
         self.case_ids = set()
-        self.collect_only = collect_only
 
     # pytest hooks
 
@@ -215,11 +214,11 @@ class PyTestRailPlugin(object):
         items_with_tr_keys = get_testrail_keys(items)
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
-        if self.collect_only:
+        if self.create_extended_help:
             self.create_plans_json(session, config, items)
 
         if self.testplan_id and self.is_testplan_available():
-            if self.create_plan_json:
+            if self.create_extended_help:
                 self.create_plan_id_json(session, config, items)
             if self.collect_by_plan_id:
                 test_run_ids = self.get_available_testruns(self.testplan_id)

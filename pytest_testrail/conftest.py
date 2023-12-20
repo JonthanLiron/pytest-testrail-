@@ -86,7 +86,7 @@ def pytest_addoption(parser):
         required=False,
         help='Collect tests from TestRail plan specified by option "--tr-plan-id"')
     group.addoption(
-        '--tr-create-plan-json',
+        '--tr-create-extended-help',
         action='store_true',
         default=None,
         required=False,
@@ -147,7 +147,6 @@ def pytest_configure(config):
         config.pluginmanager.register(
             PyTestRailPlugin(
                 client=client,
-                collect_only=config.getoption('--collect-only'),
                 assign_user_id=config_manager.getoption('tr-testrun-assignedto-id', 'assignedto_id', 'TESTRUN'),
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
@@ -161,7 +160,7 @@ def pytest_configure(config):
                 collect_by_plan_id=config_manager.getoption('tr-collect-by-plan', 'collect_by_plan', 'TESTRUN',
                                                     is_bool=True, default=False),
                 plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
-                create_plan_json=config.getoption('--tr-create-plan-json'),
+                create_extended_help=config.getoption('--tr-create-extended-help'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
